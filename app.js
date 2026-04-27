@@ -18,8 +18,8 @@ const landmarks = [
 ];
 
 let watchId = null;
-let currentTargetIndex = 0; // Το πρόγραμμα πλέον θυμάται σε ποιο σημείο βρισκόμαστε!
-let isEventActive = false; // Αυτό κλειδώνει το GPS όσο οι μαθητές διαβάζουν το μήνυμα
+let currentTargetIndex = 0; 
+let isEventActive = false; 
 
 function showScreen(screenId) {
     document.querySelectorAll('.screen').forEach(screen => {
@@ -50,8 +50,10 @@ function startTracking() {
         (position) => {
             const userLat = position.coords.latitude;
             const userLng = position.coords.longitude;
-            statusText.innerText = `Ενεργή παρακολούθηση! Ακρίβεια: ~${Math.round(position.coords.accuracy)}m`;
-            checkProximity(userLat, userLng, eventContainer);
+            const accuracy = Math.round(position.coords.accuracy);
+            
+            // Τώρα περνάμε και την ακρίβεια αλλά και το κείμενο οθόνης για να τα ενημερώνουμε
+            checkProximity(userLat, userLng, accuracy, eventContainer, statusText);
         },
         (error) => {
             statusText.innerText = "Σφάλμα. Βεβαιώσου ότι το GPS είναι ανοιχτό!";
@@ -64,16 +66,22 @@ function startTracking() {
     );
 }
 
-function checkProximity(userLat, userLng, eventContainer) {
-    // Αν τελείωσαν τα σημεία ή αν διαβάζουν ήδη ένα μήνυμα, μην κάνεις τίποτα
-    if (currentTargetIndex >= landmarks.length || isEventActive) return;
+function checkProximity(userLat, userLng, accuracy, eventContainer, statusText) {
+    if (currentTargetIndex >= landmarks.length) return;
 
-    // Ψάχνουμε ΜΟΝΟ το επόμενο σημείο στη σειρά, όχι όλα ταυτόχρονα
     const target = landmarks[currentTargetIndex];
-    const distance = calculateDistance(userLat, userLng, target.lat, target.lng);
+    // Υπολογίζουμε την απόσταση
+    const distance = Math.round(calculateDistance(userLat, userLng, target.lat, target.lng));
 
-    if (distance <= target.triggerRadius) {
-        isEventActive = true; // Κλειδώνουμε την οθόνη για να μην αναβοσβήνει αν κουνηθούν
+    // Αν οι μαθητές περπατάνε (δεν διαβάζουν μήνυμα), τους δείχνουμε τα μέτρα σαν ραντάρ!
+    if (!isEventActive) {
+        statusText.innerHTML = `Απόσταση από επόμενο σημείο: <br><b style="font-size: 1.5rem; color: #e74c3c;">${distance} μέτρα</b> 📍<br><small>(Ακρίβεια GPS: ~${accuracy}m)</small>`;
+    }
+
+    // Μόλις φτάσουν στον στόχο
+    if (distance <= target.triggerRadius && !isEventActive) {
+        isEventActive = true; 
+        statusText.innerHTML = "Είστε στο σημείο! 🎉";
         
         eventContainer.innerHTML = `
             <h3>${target.name}</h3>
@@ -84,22 +92,26 @@ function checkProximity(userLat, userLng, eventContainer) {
     }
 }
 
-// Η νέα μαγική λειτουργία για το κουμπί!
 window.nextLandmark = function() {
-    currentTargetIndex++; // Πάμε στο επόμενο σημείο
-    isEventActive = false; // Ξεκλειδώνουμε το GPS για να αρχίσει να ψάχνει ξανά
+    currentTargetIndex++; 
+    isEventActive = false; 
     
     const eventContainer = document.getElementById('active-event');
-    eventContainer.classList.add('hidden'); // Κρύβουμε το παλιό μήνυμα
+    const statusText = document.getElementById('gps-status');
     
-    // Έλεγχος αν τερμάτισαν το παιχνίδι
+    eventContainer.classList.add('hidden'); 
+    
+    // Αν τελείωσαν όλα τα σημεία
     if (currentTargetIndex >= landmarks.length) {
+        statusText.innerHTML = "Η περιπέτεια ολοκληρώθηκε! 🌟";
         eventContainer.innerHTML = `
             <h3>Συγχαρητήρια! 🏆</h3>
             <p style="margin-top:10px;">Ολοκληρώσατε με επιτυχία την περιπέτεια!</p>
         `;
         eventContainer.classList.remove('hidden');
-        stopTracking(); // Σταματάμε το GPS για οικονομία μπαταρίας
+        stopTracking(); 
+    } else {
+        statusText.innerHTML = "Αναζήτηση επόμενου σημείου... 🧭";
     }
 };
 
