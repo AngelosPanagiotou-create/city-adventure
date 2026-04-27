@@ -21,6 +21,25 @@ let watchId = null;
 let currentTargetIndex = 0; 
 let isEventActive = false; 
 
+// Μεταβλητές για τον χάρτη
+let map = null;
+let userMarker = null;
+
+// Σχεδιασμός της Κόκκινης και Μπλε Κουκκίδας
+const redIcon = L.divIcon({
+    className: 'custom-icon',
+    html: "<div style='background-color:#e74c3c; width:20px; height:20px; border-radius:50%; border:3px solid white; box-shadow: 0 0 5px rgba(0,0,0,0.5);'></div>",
+    iconSize: [20, 20],
+    iconAnchor: [10, 10]
+});
+
+const blueIcon = L.divIcon({
+    className: 'custom-icon',
+    html: "<div style='background-color:#3498db; width:20px; height:20px; border-radius:50%; border:3px solid white; box-shadow: 0 0 5px rgba(0,0,0,0.5);'></div>",
+    iconSize: [20, 20],
+    iconAnchor: [10, 10]
+});
+
 function showScreen(screenId) {
     document.querySelectorAll('.screen').forEach(screen => {
         screen.classList.remove('active');
@@ -30,8 +49,24 @@ function showScreen(screenId) {
 
     if (screenId === 'adventure-screen') {
         startTracking();
+        // Διόρθωση μεγέθους χάρτη όταν εμφανίζεται η οθόνη
+        if (map) {
+            setTimeout(() => map.invalidateSize(), 100);
+        }
     } else {
         stopTracking();
+    }
+}
+
+function initMap(lat, lng) {
+    if (!map) {
+        map = L.map('map').setView([lat, lng], 18); // Το 18 είναι ωραίο zoom για περπάτημα
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+
+        userMarker = L.marker([lat, lng], {icon: redIcon}).addTo(map);
     }
 }
 
@@ -52,7 +87,14 @@ function startTracking() {
             const userLng = position.coords.longitude;
             const accuracy = Math.round(position.coords.accuracy);
             
-            // Τώρα περνάμε και την ακρίβεια αλλά και το κείμενο οθόνης για να τα ενημερώνουμε
+            // Αρχικοποίηση ή ενημέρωση του χάρτη!
+            if (!map) {
+                initMap(userLat, userLng);
+            } else {
+                map.setView([userLat, userLng]); // Κεντράρει τον χάρτη πάνω σου
+                userMarker.setLatLng([userLat, userLng]); // Κουνάει την κουκκίδα
+            }
+            
             checkProximity(userLat, userLng, accuracy, eventContainer, statusText);
         },
         (error) => {
@@ -70,17 +112,18 @@ function checkProximity(userLat, userLng, accuracy, eventContainer, statusText) 
     if (currentTargetIndex >= landmarks.length) return;
 
     const target = landmarks[currentTargetIndex];
-    // Υπολογίζουμε την απόσταση
     const distance = Math.round(calculateDistance(userLat, userLng, target.lat, target.lng));
 
-    // Αν οι μαθητές περπατάνε (δεν διαβάζουν μήνυμα), τους δείχνουμε τα μέτρα σαν ραντάρ!
     if (!isEventActive) {
         statusText.innerHTML = `Απόσταση από επόμενο σημείο: <br><b style="font-size: 1.5rem; color: #e74c3c;">${distance} μέτρα</b> 📍<br><small>(Ακρίβεια GPS: ~${accuracy}m)</small>`;
     }
 
-    // Μόλις φτάσουν στον στόχο
     if (distance <= target.triggerRadius && !isEventActive) {
         isEventActive = true; 
+        
+        // 🌟 ΑΛΛΑΓΗ ΣΕ ΜΠΛΕ ΚΟΥΚΚΙΔΑ! 🌟
+        if (userMarker) userMarker.setIcon(blueIcon);
+
         statusText.innerHTML = "Είστε στο σημείο! 🎉";
         
         eventContainer.innerHTML = `
@@ -96,12 +139,14 @@ window.nextLandmark = function() {
     currentTargetIndex++; 
     isEventActive = false; 
     
+    // 🌟 ΕΠΑΝΑΦΟΡΑ ΣΕ ΚΟΚΚΙΝΗ ΚΟΥΚΚΙΔΑ! 🌟
+    if (userMarker) userMarker.setIcon(redIcon);
+    
     const eventContainer = document.getElementById('active-event');
     const statusText = document.getElementById('gps-status');
     
     eventContainer.classList.add('hidden'); 
     
-    // Αν τελείωσαν όλα τα σημεία
     if (currentTargetIndex >= landmarks.length) {
         statusText.innerHTML = "Η περιπέτεια ολοκληρώθηκε! 🌟";
         eventContainer.innerHTML = `
