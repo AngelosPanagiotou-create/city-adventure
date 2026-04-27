@@ -1,4 +1,4 @@
-const CACHE_NAME = 'city-adventure-v2'; // Ανεβάσαμε έκδοση για να ανανεωθεί η μνήμη
+const CACHE_NAME = 'city-adventure-v5'; // Ανεβάσαμε έκδοση για να ανανεωθεί η μνήμη
 const urlsToCache = [
   './',
   './index.html',
