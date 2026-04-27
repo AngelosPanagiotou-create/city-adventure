@@ -1,4 +1,4 @@
-const CACHE_NAME = 'city-adventure-v1';
+const CACHE_NAME = 'city-adventure-v2'; // Ανεβάσαμε έκδοση για να ανανεωθεί η μνήμη
 const urlsToCache = [
   './',
   './index.html',
@@ -7,7 +7,6 @@ const urlsToCache = [
   './manifest.json'
 ];
 
-// Όταν ανοίγει η εφαρμογή, αποθηκεύει τα αρχεία στη μνήμη του κινητού
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
@@ -17,15 +16,36 @@ self.addEventListener('install', event => {
   );
 });
 
-// Όταν η εφαρμογή ζητάει αρχεία, τα δίνει από τη μνήμη, ακόμα και χωρίς internet!
 self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request)
       .then(response => {
         if (response) {
-          return response; // Τα βρήκε στη μνήμη (Offline)
+          return response; 
         }
-        return fetch(event.request); // Προσπαθεί να τα κατεβάσει αν δεν τα έχει
+        
+        return fetch(event.request).then(networkResponse => {
+            // Αν το αρχείο ανήκει στον φάκελο tiles, αποθήκευσέ το δυναμικά!
+            if (event.request.url.includes('/tiles/')) {
+                let responseClone = networkResponse.clone();
+                caches.open(CACHE_NAME).then(cache => {
+                    cache.put(event.request, responseClone);
+                });
+            }
+            return networkResponse;
+        });
       })
+  );
+});
+
+// Καθαρισμός παλιάς μνήμης όταν ανεβάζουμε νέα έκδοση
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys().then(cacheNames => {
+      return Promise.all(
+        cacheNames.filter(name => name !== CACHE_NAME)
+                  .map(name => caches.delete(name))
+      );
+    })
   );
 });
