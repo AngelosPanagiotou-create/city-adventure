@@ -5,9 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>City Adventure</title>
     <link rel="stylesheet" href="style.css">
-</head>
+    <link rel="manifest" href="manifest.json"> </head>
 <body>
     <div id="app-container">
+        
         <div id="home-screen" class="screen active">
             <h1>City Adventure 🗺️</h1>
             <p class="subtitle">Έτοιμοι για εξερεύνηση;</p>
@@ -38,7 +39,16 @@
             </ul>
             <button class="back-btn" onclick="showScreen('home-screen')">🔙 Πίσω στο Μενού</button>
         </div>
+
     </div>
+    
     <script src="app.js"></script>
+    
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js')
+            .then(() => console.log('Το Offline Mode ενεργοποιήθηκε!'));
+        }
+    </script>
 </body>
 </html>
