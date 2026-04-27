@@ -31,11 +31,12 @@ const redIcon = L.divIcon({
     iconAnchor: [10, 10]
 });
 
-const blueIcon = L.divIcon({
-    className: 'custom-icon',
-    html: "<div style='background-color:#3498db; width:20px; height:20px; border-radius:50%; border:3px solid white; box-shadow: 0 0 5px rgba(0,0,0,0.5);'></div>",
-    iconSize: [20, 20],
-    iconAnchor: [10, 10]
+// 🌟 ΝΕΟ ΠΡΑΣΙΝΟ ΑΣΤΕΡΙ! 🌟
+const greenStarIcon = L.divIcon({
+    className: 'custom-icon star-icon',
+    html: "<div style='display:flex; justify-content:center; align-items:center; width:30px; height:30px; color:#2ecc71; font-size:30px; text-shadow: 0 0 5px rgba(0,0,0,0.5);'>★</div>",
+    iconSize: [30, 30],
+    iconAnchor: [15, 15]
 });
 
 function showScreen(screenId) {
@@ -58,11 +59,8 @@ function showScreen(screenId) {
 function initMap(lat, lng) {
     if (!map) {
         map = L.map('map').setView([lat, lng], 18); 
-        
-        // 🌟 ΣΥΝΔΕΣΗ ΜΕ ΤΟΝ ΤΟΠΙΚΟ ΦΑΚΕΛΟ TILES 🌟
-        L.tileLayer('./tiles/{z}/{x}/{y}.png', {
-            minZoom: 17,
-            maxZoom: 18,
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
             attribution: '© OpenStreetMap'
         }).addTo(map);
 
@@ -119,7 +117,10 @@ function checkProximity(userLat, userLng, accuracy, eventContainer, statusText) 
 
     if (distance <= target.triggerRadius && !isEventActive) {
         isEventActive = true; 
-        if (userMarker) userMarker.setIcon(blueIcon);
+        
+        // 🌟 ΑΛΛΑΓΗ ΣΕ ΠΡΑΣΙΝΟ ΑΣΤΕΡΙ! 🌟
+        if (userMarker) userMarker.setIcon(greenStarIcon);
+
         statusText.innerHTML = "Είστε στο σημείο! 🎉";
         
         eventContainer.innerHTML = `
@@ -134,10 +135,13 @@ function checkProximity(userLat, userLng, accuracy, eventContainer, statusText) 
 window.nextLandmark = function() {
     currentTargetIndex++; 
     isEventActive = false; 
+    
+    // 🌟 ΕΠΑΝΑΦΟΡΑ ΣΕ ΚΟΚΚΙΝΗ ΚΟΥΚΚΙΔΑ! 🌟
     if (userMarker) userMarker.setIcon(redIcon);
     
     const eventContainer = document.getElementById('active-event');
     const statusText = document.getElementById('gps-status');
+    
     eventContainer.classList.add('hidden'); 
     
     if (currentTargetIndex >= landmarks.length) {
@@ -166,7 +170,11 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
     const φ2 = lat2 * Math.PI / 180;
     const Δφ = (lat2 - lat1) * Math.PI / 180;
     const Δλ = (lon2 - lon1) * Math.PI / 180;
-    const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+
+    const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+              Math.cos(φ1) * Math.cos(φ2) *
+              Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
     return R * c; 
 }
