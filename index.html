@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>City Adventure</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app-container">
+        <div id="home-screen" class="screen active">
+            <h1>City Adventure 🗺️</h1>
+            <p class="subtitle">Έτοιμοι για εξερεύνηση;</p>
+            <div class="menu">
+                <button class="menu-btn" onclick="showScreen('adventure-screen')">🧭 Περιπέτεια</button>
+                <button class="menu-btn" onclick="showScreen('score-screen')">🏆 Βαθμολογία</button>
+                <button class="menu-btn" onclick="showScreen('inventory-screen')">🎒 Αντικείμενα</button>
+            </div>
+        </div>
+
+        <div id="adventure-screen" class="screen">
+            <h2>Σε κίνηση...</h2>
+            <p id="gps-status">Αναμονή για σήμα GPS...</p>
+            <div id="active-event" class="hidden"></div>
+            <button class="back-btn" onclick="showScreen('home-screen')">🔙 Πίσω στο Μενού</button>
+        </div>
+
+        <div id="score-screen" class="screen">
+            <h2>Η Βαθμολογία σου 🏆</h2>
+            <p class="score-display">Πόντοι: <span id="points">0</span></p>
+            <button class="back-btn" onclick="showScreen('home-screen')">🔙 Πίσω στο Μενού</button>
+        </div>
+
+        <div id="inventory-screen" class="screen">
+            <h2>Αντικείμενα 🎒</h2>
+            <ul id="item-list" style="list-style: none;">
+                <li>Κανένα αντικείμενο ακόμα.</li>
+            </ul>
+            <button class="back-btn" onclick="showScreen('home-screen')">🔙 Πίσω στο Μενού</button>
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
