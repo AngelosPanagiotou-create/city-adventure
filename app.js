@@ -31,7 +31,7 @@ const redIcon = L.divIcon({
     iconAnchor: [10, 10]
 });
 
-// 🌟 ΝΕΟ ΠΡΑΣΙΝΟ ΑΣΤΕΡΙ! 🌟
+// Το πράσινο αστέρι μας!
 const greenStarIcon = L.divIcon({
     className: 'custom-icon star-icon',
     html: "<div style='display:flex; justify-content:center; align-items:center; width:30px; height:30px; color:#2ecc71; font-size:30px; text-shadow: 0 0 5px rgba(0,0,0,0.5);'>★</div>",
@@ -59,9 +59,12 @@ function showScreen(screenId) {
 function initMap(lat, lng) {
     if (!map) {
         map = L.map('map').setView([lat, lng], 18); 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '© OpenStreetMap'
+        
+        // 🌟 ΤΟ ΔΙΟΡΘΩΣΑ! Τώρα διαβάζει τα δικά σου δορυφορικά πλακάκια 🌟
+        L.tileLayer('./tiles/{z}/{x}/{y}.png', {
+            minZoom: 17,
+            maxZoom: 18,
+            attribution: '© Google Satellite'
         }).addTo(map);
 
         userMarker = L.marker([lat, lng], {icon: redIcon}).addTo(map);
@@ -118,7 +121,6 @@ function checkProximity(userLat, userLng, accuracy, eventContainer, statusText) 
     if (distance <= target.triggerRadius && !isEventActive) {
         isEventActive = true; 
         
-        // 🌟 ΑΛΛΑΓΗ ΣΕ ΠΡΑΣΙΝΟ ΑΣΤΕΡΙ! 🌟
         if (userMarker) userMarker.setIcon(greenStarIcon);
 
         statusText.innerHTML = "Είστε στο σημείο! 🎉";
@@ -136,7 +138,6 @@ window.nextLandmark = function() {
     currentTargetIndex++; 
     isEventActive = false; 
     
-    // 🌟 ΕΠΑΝΑΦΟΡΑ ΣΕ ΚΟΚΚΙΝΗ ΚΟΥΚΚΙΔΑ! 🌟
     if (userMarker) userMarker.setIcon(redIcon);
     
     const eventContainer = document.getElementById('active-event');
