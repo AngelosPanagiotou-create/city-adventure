@@ -18,6 +18,8 @@ const landmarks = [
 ];
 
 let watchId = null;
+let currentTargetIndex = 0; // Το πρόγραμμα πλέον θυμάται σε ποιο σημείο βρισκόμαστε!
+let isEventActive = false; // Αυτό κλειδώνει το GPS όσο οι μαθητές διαβάζουν το μήνυμα
 
 function showScreen(screenId) {
     document.querySelectorAll('.screen').forEach(screen => {
@@ -62,29 +64,49 @@ function startTracking() {
     );
 }
 
+function checkProximity(userLat, userLng, eventContainer) {
+    // Αν τελείωσαν τα σημεία ή αν διαβάζουν ήδη ένα μήνυμα, μην κάνεις τίποτα
+    if (currentTargetIndex >= landmarks.length || isEventActive) return;
+
+    // Ψάχνουμε ΜΟΝΟ το επόμενο σημείο στη σειρά, όχι όλα ταυτόχρονα
+    const target = landmarks[currentTargetIndex];
+    const distance = calculateDistance(userLat, userLng, target.lat, target.lng);
+
+    if (distance <= target.triggerRadius) {
+        isEventActive = true; // Κλειδώνουμε την οθόνη για να μην αναβοσβήνει αν κουνηθούν
+        
+        eventContainer.innerHTML = `
+            <h3>${target.name}</h3>
+            <p style="margin-top:10px; margin-bottom:15px;">${target.eventText}</p>
+            <button class="menu-btn" style="width: 100%; background-color: #2ecc71;" onclick="nextLandmark()">Συνέχισε την περιπέτεια 🧭</button>
+        `;
+        eventContainer.classList.remove('hidden');
+    }
+}
+
+// Η νέα μαγική λειτουργία για το κουμπί!
+window.nextLandmark = function() {
+    currentTargetIndex++; // Πάμε στο επόμενο σημείο
+    isEventActive = false; // Ξεκλειδώνουμε το GPS για να αρχίσει να ψάχνει ξανά
+    
+    const eventContainer = document.getElementById('active-event');
+    eventContainer.classList.add('hidden'); // Κρύβουμε το παλιό μήνυμα
+    
+    // Έλεγχος αν τερμάτισαν το παιχνίδι
+    if (currentTargetIndex >= landmarks.length) {
+        eventContainer.innerHTML = `
+            <h3>Συγχαρητήρια! 🏆</h3>
+            <p style="margin-top:10px;">Ολοκληρώσατε με επιτυχία την περιπέτεια!</p>
+        `;
+        eventContainer.classList.remove('hidden');
+        stopTracking(); // Σταματάμε το GPS για οικονομία μπαταρίας
+    }
+};
+
 function stopTracking() {
     if (watchId !== null) {
         navigator.geolocation.clearWatch(watchId);
         watchId = null;
-    }
-}
-
-function checkProximity(userLat, userLng, eventContainer) {
-    let foundLandmark = false;
-
-    for (let i = 0; i < landmarks.length; i++) {
-        const distance = calculateDistance(userLat, userLng, landmarks[i].lat, landmarks[i].lng);
-
-        if (distance <= landmarks[i].triggerRadius) {
-            eventContainer.innerHTML = `<h3>${landmarks[i].name}</h3><p style="margin-top:10px;">${landmarks[i].eventText}</p>`;
-            eventContainer.classList.remove('hidden');
-            foundLandmark = true;
-            break; 
-        }
-    }
-
-    if (!foundLandmark) {
-        eventContainer.classList.add('hidden');
     }
 }
 
