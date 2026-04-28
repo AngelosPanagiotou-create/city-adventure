@@ -94,5 +94,11 @@
     </div>
     
     <script src="app.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js')
+            .then(() => console.log('Το Offline Mode και το PWA ενεργοποιήθηκαν!'));
+        }
+    </script>
 </body>
 </html>
