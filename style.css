@@ -1,9 +1,11 @@
+/* Εισαγωγή γραμματοσειράς Urbanist για gaming αίσθηση */
 @import url('https://fonts.googleapis.com/css2?family=Urbanist:wght@400;700&display=swap');
 
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent; /* Αφαιρεί το μπλε πλαίσιο στο πάτημα σε κινητά */
 }
 
 body {
@@ -11,7 +13,8 @@ body {
     background-color: #000;
     color: #fff;
     height: 100vh;
-    overflow: hidden;
+    width: 100vw;
+    overflow: hidden; /* Απαγορεύει το κούνημα της σελίδας έξω από το app */
 }
 
 #app-container {
@@ -20,36 +23,51 @@ body {
     flex-direction: column;
 }
 
-/* Header & Nav Icons */
+/* --- HEADER & NAVIGATION ICONS --- */
 header {
     background-color: #111;
-    height: 70px;
+    height: 85px; /* Λίγο πιο ψηλό για να χωράνε τα μεγάλα εικονίδια */
     display: flex;
     align-items: center;
-    padding: 0 15px;
+    padding: 0 10px;
     border-bottom: 2px solid #deff9a;
+    z-index: 1000;
 }
 
 .nav-icons {
     flex-grow: 1;
     display: flex;
     justify-content: space-around;
+    align-items: center;
 }
 
 .nav-item {
-    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     color: #888;
-    font-size: 12px;
+    font-size: 10px;
+    font-weight: bold;
+    text-transform: uppercase;
+    transition: 0.3s;
 }
 
-.nav-item i {
-    font-size: 22px;
-    display: block;
-    margin-bottom: 3px;
+.nav-item img {
+    width: 42px; /* Μεγάλα εικονίδια όπως στο TaleBlazer */
+    height: 42px;
+    object-fit: contain;
+    margin-bottom: 4px;
+    transition: transform 0.2s, filter 0.2s;
 }
 
+/* Εφέ για το επιλεγμένο Tab */
 .nav-item.active {
     color: #deff9a;
+}
+
+.nav-item.active img {
+    transform: scale(1.2); /* Φουσκώνει το εικονίδιο */
+    filter: drop-shadow(0 0 8px #deff9a); /* Λάμψη γύρω από το εικονίδιο */
 }
 
 #menu-toggle {
@@ -57,14 +75,14 @@ header {
     border: none;
     color: white;
     font-size: 24px;
-    margin-left: 10px;
+    padding: 10px;
 }
 
-/* Screens */
+/* --- SCREENS --- */
 .screen {
     display: none;
     flex-grow: 1;
-    height: calc(100vh - 70px);
+    height: calc(100vh - 85px);
 }
 
 .screen.active {
@@ -72,97 +90,171 @@ header {
     flex-direction: column;
 }
 
-/* Home Screen */
+/* --- HOME / SPLASH SCREEN --- */
 .splash-content {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     height: 100%;
-    background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=800&q=80');
+    background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), 
+                url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=800&q=80');
     background-size: cover;
+    background-position: center;
     text-align: center;
+    padding: 20px;
 }
 
-.logo-placeholder { font-size: 80px; margin-bottom: 20px; }
+.logo-placeholder { 
+    font-size: 80px; 
+    margin-bottom: 10px; 
+    filter: drop-shadow(0 0 15px #deff9a);
+}
+
 .start-btn {
     margin-top: 30px;
-    padding: 15px 40px;
+    padding: 18px 45px;
     background-color: #deff9a;
     color: #000;
     border: none;
     border-radius: 50px;
-    font-weight: bold;
+    font-weight: 800;
     font-size: 18px;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 15px rgba(222, 255, 154, 0.4);
 }
 
-/* Game Layout (Split Screen) */
+/* --- GAME LAYOUT (SPLIT SCREEN) --- */
 #map-pane {
-    height: 40%;
+    height: 40%; /* Ο χάρτης πιάνει το πάνω μέρος */
     width: 100%;
     position: relative;
-    border-bottom: 2px solid #333;
+    border-bottom: 3px solid #222;
 }
 
 #map { height: 100%; width: 100%; }
 
+/* Overlay απόστασης πάνω στο χάρτη */
 #dist-overlay {
     position: absolute;
-    top: 10px;
-    right: 10px;
-    background: rgba(0,0,0,0.8);
-    padding: 5px 15px;
-    border-radius: 20px;
+    top: 15px;
+    right: 15px;
+    background: rgba(0,0,0,0.85);
+    padding: 8px 18px;
+    border-radius: 25px;
     color: #deff9a;
     font-weight: bold;
+    font-size: 16px;
     z-index: 1000;
+    border: 1px solid #deff9a;
 }
 
 #content-pane {
-    height: 60%;
+    height: 60%; /* Το περιεχόμενο πιάνει το κάτω μέρος */
     background-color: #000;
     padding: 20px;
-    overflow-y: auto;
+    overflow-y: auto; /* Επιτρέπει το σκρολάρισμα αν το κείμενο είναι πολύ */
 }
 
 .tab-content { display: none; }
 .tab-content.active { display: block; }
 
-/* Event Box */
+/* --- EVENT BOX (ΟΤΑΝ ΦΤΑΝΕΙΣ ΣΤΟ ΣΗΜΕΙΟ) --- */
 #active-event {
-    background-color: #1a1a1a;
+    background-color: #161616;
     padding: 20px;
-    border-radius: 15px;
-    margin-top: 20px;
-    border: 1px solid #deff9a;
+    border-radius: 20px;
+    margin-top: 10px;
+    border: 2px solid #deff9a;
+    animation: slideUp 0.4s ease-out;
 }
 
-#active-event h3 { color: #deff9a; margin-bottom: 10px; }
+@keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
 
-/* Sidebar */
+#active-event h3 { color: #deff9a; margin-bottom: 12px; font-size: 20px; }
+#active-event p { line-height: 1.5; color: #eee; margin-bottom: 15px; }
+
+/* --- INVENTORY & BADGES GRIDS --- */
+.inventory-grid, .badges-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* 2 στήλες για τις φωτογραφίες */
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.inv-item {
+    background: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 15px;
+    padding: 12px;
+    text-align: center;
+    transition: 0.3s;
+}
+
+.inv-photo {
+    width: 100%;
+    height: 110px;
+    object-fit: cover;
+    border-radius: 10px;
+    border: 2px solid #deff9a;
+    margin-bottom: 8px;
+}
+
+.badge-icon {
+    font-size: 40px;
+    margin-bottom: 5px;
+}
+
+/* --- SIDEBAR MENU --- */
 .sidebar {
     position: fixed;
-    right: -250px;
+    right: -280px;
     top: 0;
-    width: 250px;
+    width: 280px;
     height: 100%;
     background: #111;
     z-index: 2000;
-    transition: 0.3s;
-    padding: 20px;
+    transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    padding: 30px 20px;
+    box-shadow: -5px 0 20px rgba(0,0,0,0.5);
 }
 
 .sidebar.active { right: 0; }
+
+.sidebar h3 { color: #deff9a; margin-bottom: 25px; border-bottom: 1px solid #333; padding-bottom: 10px; }
+
 .sidebar-content button {
-    display: block;
+    display: flex;
+    align-items: center;
     width: 100%;
-    padding: 15px;
+    padding: 18px;
     background: none;
     border: none;
     color: white;
     text-align: left;
     font-size: 18px;
     border-bottom: 1px solid #222;
+    font-family: 'Urbanist', sans-serif;
 }
 
+.sidebar-content button i { margin-right: 15px; color: #deff9a; width: 25px; }
+
+.close-btn {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background: none;
+    border: none;
+    color: #deff9a;
+    font-size: 30px;
+}
+
+/* --- UTILITIES --- */
 .hidden { display: none !important; }
+
+/* Custom Scrollbar για το κινητό */
+#content-pane::-webkit-scrollbar { width: 5px; }
+#content-pane::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
