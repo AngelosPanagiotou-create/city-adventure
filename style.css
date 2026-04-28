@@ -1,81 +1,168 @@
+@import url('https://fonts.googleapis.com/css2?family=Urbanist:wght@400;700&display=swap');
+
 * {
-    box-sizing: border-box;
     margin: 0;
     padding: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    box-sizing: border-box;
 }
 
 body {
-    background-color: #f4f7f6;
-    color: #333;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    font-family: 'Urbanist', sans-serif;
+    background-color: #000;
+    color: #fff;
     height: 100vh;
-}
-
-#app-container {
-    width: 100%;
-    max-width: 400px;
-    height: 100vh;
-    background: white;
-    padding: 20px;
-    box-shadow: 0 0 20px rgba(0,0,0,0.1);
-    position: relative;
     overflow: hidden;
 }
 
+#app-container {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header & Nav Icons */
+header {
+    background-color: #111;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    padding: 0 15px;
+    border-bottom: 2px solid #deff9a;
+}
+
+.nav-icons {
+    flex-grow: 1;
+    display: flex;
+    justify-content: space-around;
+}
+
+.nav-item {
+    text-align: center;
+    color: #888;
+    font-size: 12px;
+}
+
+.nav-item i {
+    font-size: 22px;
+    display: block;
+    margin-bottom: 3px;
+}
+
+.nav-item.active {
+    color: #deff9a;
+}
+
+#menu-toggle {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    margin-left: 10px;
+}
+
+/* Screens */
 .screen {
     display: none;
-    text-align: center;
-    padding-top: 40px;
+    flex-grow: 1;
+    height: calc(100vh - 70px);
 }
 
 .screen.active {
-    display: block;
-}
-
-h1 { color: #2c3e50; font-size: 2.5rem; margin-bottom: 10px; }
-h2 { color: #2980b9; margin-bottom: 20px; }
-.subtitle { color: #7f8c8d; margin-bottom: 40px; }
-
-.menu {
     display: flex;
     flex-direction: column;
-    gap: 15px;
 }
 
-.menu-btn, .back-btn {
-    background-color: #3498db;
-    color: white;
-    border: none;
-    padding: 15px;
-    font-size: 1.2rem;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: background 0.3s;
+/* Home Screen */
+.splash-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=800&q=80');
+    background-size: cover;
+    text-align: center;
 }
 
-.menu-btn:hover, .back-btn:hover {
-    background-color: #2980b9;
-}
-
-.back-btn {
-    background-color: #e74c3c;
+.logo-placeholder { font-size: 80px; margin-bottom: 20px; }
+.start-btn {
     margin-top: 30px;
+    padding: 15px 40px;
+    background-color: #deff9a;
+    color: #000;
+    border: none;
+    border-radius: 50px;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+/* Game Layout (Split Screen) */
+#map-pane {
+    height: 40%;
     width: 100%;
+    position: relative;
+    border-bottom: 2px solid #333;
 }
 
-.back-btn:hover {
-    background-color: #c0392b;
+#map { height: 100%; width: 100%; }
+
+#dist-overlay {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(0,0,0,0.8);
+    padding: 5px 15px;
+    border-radius: 20px;
+    color: #deff9a;
+    font-weight: bold;
+    z-index: 1000;
 }
 
-.hidden { display: none; }
-
-#active-event { 
-    background: #e8f4f8; 
-    padding: 15px; 
-    border-radius: 10px; 
-    margin-top: 20px; 
-    border-left: 5px solid #2980b9; 
+#content-pane {
+    height: 60%;
+    background-color: #000;
+    padding: 20px;
+    overflow-y: auto;
 }
+
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* Event Box */
+#active-event {
+    background-color: #1a1a1a;
+    padding: 20px;
+    border-radius: 15px;
+    margin-top: 20px;
+    border: 1px solid #deff9a;
+}
+
+#active-event h3 { color: #deff9a; margin-bottom: 10px; }
+
+/* Sidebar */
+.sidebar {
+    position: fixed;
+    right: -250px;
+    top: 0;
+    width: 250px;
+    height: 100%;
+    background: #111;
+    z-index: 2000;
+    transition: 0.3s;
+    padding: 20px;
+}
+
+.sidebar.active { right: 0; }
+.sidebar-content button {
+    display: block;
+    width: 100%;
+    padding: 15px;
+    background: none;
+    border: none;
+    color: white;
+    text-align: left;
+    font-size: 18px;
+    border-bottom: 1px solid #222;
+}
+
+.hidden { display: none !important; }
