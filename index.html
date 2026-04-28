@@ -8,52 +8,91 @@
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body>
     <div id="app-container">
         
-        <div id="home-screen" class="screen active">
-            <h1>City Adventure 🗺️</h1>
-            <p class="subtitle">Έτοιμοι για εξερεύνηση;</p>
-            <div class="menu">
-                <button class="menu-btn" onclick="showScreen('adventure-screen')">🧭 Περιπέτεια</button>
-                <button class="menu-btn" onclick="showScreen('score-screen')">🏆 Βαθμολογία</button>
-                <button class="menu-btn" onclick="showScreen('inventory-screen')">🎒 Αντικείμενα</button>
+        <header id="main-header" class="hidden">
+            <div class="nav-icons">
+                <div class="nav-item active" onclick="switchTab('map')">
+                    <i class="fa-solid fa-map-location-dot"></i>
+                    <span>Map</span>
+                </div>
+                <div class="nav-item" onclick="switchTab('player')">
+                    <i class="fa-solid fa-user"></i>
+                    <span>Player</span>
+                </div>
+                <div class="nav-item" onclick="switchTab('inventory')">
+                    <i class="fa-solid fa-backpack"></i>
+                    <span>Items</span>
+                </div>
+                <div class="nav-item" onclick="switchTab('history')">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                    <span>History</span>
+                </div>
+            </div>
+            <button id="menu-toggle" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+        </header>
+
+        <div id="sidebar" class="sidebar">
+            <button class="close-btn" onclick="toggleSidebar()">×</button>
+            <div class="sidebar-content">
+                <h3>Menu</h3>
+                <button onclick="location.reload()"><i class="fa-solid fa-house"></i> Αρχική</button>
+                <button onclick="alert('City Adventure v1.0 - Dirfys Edition')"><i class="fa-solid fa-info-circle"></i> Πληροφορίες</button>
+                <button onclick="window.close()"><i class="fa-solid fa-door-open"></i> Έξοδος</button>
             </div>
         </div>
 
-        <div id="adventure-screen" class="screen">
-            <h2>Σε κίνηση...</h2>
-            
-            <div id="map" style="height: 250px; width: 100%; border-radius: 10px; margin-bottom: 15px; border: 2px solid #3498db; z-index: 1;"></div>
-            
-            <p id="gps-status">Αναμονή για σήμα GPS...</p>
-            <div id="active-event" class="hidden"></div>
-            <button class="back-btn" onclick="showScreen('home-screen')">🔙 Πίσω στο Μενού</button>
+        <div id="home-screen" class="screen active">
+            <div class="splash-content">
+                <div class="logo-placeholder">🗺️</div>
+                <h1>City Adventure</h1>
+                <p>Εξερεύνησε τη Στενή Δίρφυος</p>
+                <button class="start-btn" onclick="startGame()">ΕΚΚΙΝΗΣΗ ΠΑΙΧΝΙΔΙΟΥ</button>
+            </div>
         </div>
 
-        <div id="score-screen" class="screen">
-            <h2>Η Βαθμολογία σου 🏆</h2>
-            <p class="score-display">Πόντοι: <span id="points">0</span></p>
-            <button class="back-btn" onclick="showScreen('home-screen')">🔙 Πίσω στο Μενού</button>
-        </div>
+        <div id="game-screen" class="screen">
+            
+            <div id="map-pane">
+                <div id="map"></div>
+                <div id="dist-overlay">--- m</div>
+            </div>
 
-        <div id="inventory-screen" class="screen">
-            <h2>Αντικείμενα 🎒</h2>
-            <ul id="item-list" style="list-style: none;">
-                <li>Κανένα αντικείμενο ακόμα.</li>
-            </ul>
-            <button class="back-btn" onclick="showScreen('home-screen')">🔙 Πίσω στο Μενού</button>
+            <div id="content-pane">
+                <div id="tab-map" class="tab-content active">
+                    <p id="gps-status">Αναμονή για σήμα GPS...</p>
+                    <div id="active-event" class="hidden"></div>
+                </div>
+                
+                <div id="tab-player" class="tab-content">
+                    <h3>Προφίλ Παίκτη</h3>
+                    <p>Εξερευνητής της Δίρφυς</p>
+                    <div class="stats">
+                        <p>Σημεία: <span id="points">0/2</span></p>
+                    </div>
+                </div>
+
+                <div id="tab-inventory" class="tab-content">
+                    <h3>Backpack</h3>
+                    <div class="inventory-grid">
+                        <p>Η τσάντα σου είναι άδεια.</p>
+                    </div>
+                </div>
+
+                <div id="tab-history" class="tab-content">
+                    <h3>Ιστορικό</h3>
+                    <div id="history-log">
+                        <p>Ξεκινήστε την περιπέτεια για να δείτε το ιστορικό.</p>
+                    </div>
+                </div>
+            </div>
         </div>
 
     </div>
     
     <script src="app.js"></script>
-    <script>
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js')
-            .then(() => console.log('Το Offline Mode ενεργοποιήθηκε!'));
-        }
-    </script>
 </body>
 </html>
