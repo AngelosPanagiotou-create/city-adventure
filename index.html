@@ -13,23 +13,25 @@
 <body>
     <div id="app-container">
         
+        <input type="file" accept="image/*" capture="environment" id="camera-input" class="hidden" onchange="savePhotoToInventory(event)">
+
         <header id="main-header" class="hidden">
             <div class="nav-icons">
                 <div class="nav-item active" onclick="switchTab('map')">
-                    <i class="fa-solid fa-map-location-dot"></i>
+                    <img src="https://img.icons8.com/color/96/map-marker--v1.png" alt="Map">
                     <span>Map</span>
                 </div>
                 <div class="nav-item" onclick="switchTab('player')">
-                    <i class="fa-solid fa-user"></i>
+                    <img src="https://img.icons8.com/color/96/test-account.png" alt="Player">
                     <span>Player</span>
                 </div>
                 <div class="nav-item" onclick="switchTab('inventory')">
-                    <i class="fa-solid fa-backpack"></i>
+                    <img src="https://img.icons8.com/color/96/backpack.png" alt="Items">
                     <span>Items</span>
                 </div>
-                <div class="nav-item" onclick="switchTab('history')">
-                    <i class="fa-solid fa-clock-rotate-left"></i>
-                    <span>History</span>
+                <div class="nav-item" onclick="switchTab('badges')">
+                    <img src="https://img.icons8.com/color/96/medal2.png" alt="Badges">
+                    <span>Badges</span>
                 </div>
             </div>
             <button id="menu-toggle" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
@@ -70,23 +72,19 @@
                 <div id="tab-player" class="tab-content">
                     <h3>Προφίλ Παίκτη</h3>
                     <p>Εξερευνητής της Δίρφυς</p>
-                    <div class="stats">
-                        <p>Σημεία: <span id="points">0/2</span></p>
-                    </div>
                 </div>
 
                 <div id="tab-inventory" class="tab-content">
-                    <h3>Backpack</h3>
-                    <div class="inventory-grid">
-                        <p>Η τσάντα σου είναι άδεια.</p>
-                    </div>
+                    <h3>Σακίδιο Πλάτης 🎒</h3>
+                    <div id="inventory-grid" class="inventory-grid">
+                        </div>
                 </div>
 
-                <div id="tab-history" class="tab-content">
-                    <h3>Ιστορικό</h3>
-                    <div id="history-log">
-                        <p>Ξεκινήστε την περιπέτεια για να δείτε το ιστορικό.</p>
-                    </div>
+                <div id="tab-badges" class="tab-content">
+                    <h3>Τα Μετάλλιά σου 🏆</h3>
+                    <p>Συνολικοί Πόντοι: <b id="points-display" style="color:#deff9a; font-size: 24px;">0</b></p>
+                    <div id="badges-grid" class="badges-grid">
+                        </div>
                 </div>
             </div>
         </div>
