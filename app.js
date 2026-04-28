@@ -1,3 +1,4 @@
+// ... (κρατάς το landmarks array και τις μεταβλητές GPS όπως ήταν) ...
 const landmarks = [
     {
         id: 1,
@@ -20,162 +21,111 @@ const landmarks = [
 let watchId = null;
 let currentTargetIndex = 0; 
 let isEventActive = false; 
-
 let map = null;
 let userMarker = null;
 
+// Icons
 const redIcon = L.divIcon({
     className: 'custom-icon',
-    html: "<div style='background-color:#e74c3c; width:20px; height:20px; border-radius:50%; border:3px solid white; box-shadow: 0 0 5px rgba(0,0,0,0.5);'></div>",
-    iconSize: [20, 20],
-    iconAnchor: [10, 10]
+    html: "<div style='background-color:#e74c3c; width:18px; height:18px; border-radius:50%; border:2px solid white;'></div>",
+    iconSize: [18, 18], iconAnchor: [9, 9]
 });
 
-// Το πράσινο αστέρι μας!
 const greenStarIcon = L.divIcon({
     className: 'custom-icon star-icon',
-    html: "<div style='display:flex; justify-content:center; align-items:center; width:30px; height:30px; color:#2ecc71; font-size:30px; text-shadow: 0 0 5px rgba(0,0,0,0.5);'>★</div>",
-    iconSize: [30, 30],
-    iconAnchor: [15, 15]
+    html: "<div style='color:#deff9a; font-size:30px; text-shadow: 0 0 5px #000;'>★</div>",
+    iconSize: [30, 30], iconAnchor: [15, 15]
 });
 
-function showScreen(screenId) {
-    document.querySelectorAll('.screen').forEach(screen => {
-        screen.classList.remove('active');
-    });
-    
-    document.getElementById(screenId).classList.add('active');
-
-    if (screenId === 'adventure-screen') {
-        startTracking();
-        if (map) {
-            setTimeout(() => map.invalidateSize(), 100);
-        }
-    } else {
-        stopTracking();
-    }
+// Switch Screens
+function startGame() {
+    document.getElementById('home-screen').classList.remove('active');
+    document.getElementById('game-screen').classList.add('active');
+    document.getElementById('main-header').classList.remove('hidden');
+    startTracking();
 }
 
+// Switch Tabs (TaleBlazer Style)
+function switchTab(tabId) {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+    
+    document.getElementById('tab-' + tabId).classList.add('active');
+    // Βρίσκουμε το σωστό icon για να το κάνουμε active
+    const icons = document.querySelectorAll('.nav-item');
+    if(tabId === 'map') icons[0].classList.add('active');
+    if(tabId === 'player') icons[1].classList.add('active');
+    if(tabId === 'inventory') icons[2].classList.add('active');
+    if(tabId === 'history') icons[3].classList.add('active');
+
+    if (map) setTimeout(() => map.invalidateSize(), 100);
+}
+
+// Sidebar
+function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('active');
+}
+
+// GPS Tracking (όπως πριν, αλλά με ενημέρωση του content-pane)
 function initMap(lat, lng) {
     if (!map) {
-        map = L.map('map').setView([lat, lng], 18); 
-        
-        // 🌟 ΤΟ ΔΙΟΡΘΩΣΑ! Τώρα διαβάζει τα δικά σου δορυφορικά πλακάκια 🌟
+        map = L.map('map', {zoomControl: false}).setView([lat, lng], 18); 
         L.tileLayer('./tiles/{z}/{x}/{y}.png', {
-            minZoom: 17,
-            maxZoom: 18,
-            attribution: '© Google Satellite'
+            minZoom: 17, maxZoom: 18, attribution: '© Google'
         }).addTo(map);
-
         userMarker = L.marker([lat, lng], {icon: redIcon}).addTo(map);
     }
 }
 
 function startTracking() {
-    const statusText = document.getElementById('gps-status');
-    const eventContainer = document.getElementById('active-event');
-
-    if (!navigator.geolocation) {
-        statusText.innerText = "Το κινητό σου δεν υποστηρίζει GPS!";
-        return;
-    }
-
-    statusText.innerText = "Εντοπισμός δορυφόρων... 🛰️";
-
     watchId = navigator.geolocation.watchPosition(
         (position) => {
             const userLat = position.coords.latitude;
             const userLng = position.coords.longitude;
-            const accuracy = Math.round(position.coords.accuracy);
-            
-            if (!map) {
-                initMap(userLat, userLng);
-            } else {
-                map.setView([userLat, userLng]);
-                userMarker.setLatLng([userLat, userLng]);
-            }
-            
-            checkProximity(userLat, userLng, accuracy, eventContainer, statusText);
+            if (!map) { initMap(userLat, userLng); } 
+            else { map.setView([userLat, userLng]); userMarker.setLatLng([userLat, userLng]); }
+            checkProximity(userLat, userLng);
         },
-        (error) => {
-            statusText.innerText = "Σφάλμα. Βεβαιώσου ότι το GPS είναι ανοιχτό!";
-        },
-        {
-            enableHighAccuracy: true,
-            maximumAge: 0,
-            timeout: 5000
-        }
+        null, { enableHighAccuracy: true }
     );
 }
 
-function checkProximity(userLat, userLng, accuracy, eventContainer, statusText) {
+function checkProximity(lat, lng) {
     if (currentTargetIndex >= landmarks.length) return;
-
     const target = landmarks[currentTargetIndex];
-    const distance = Math.round(calculateDistance(userLat, userLng, target.lat, target.lng));
+    const dist = calculateDistance(lat, lng, target.lat, target.lng);
+    
+    document.getElementById('dist-overlay').innerText = Math.round(dist) + " m";
 
-    if (!isEventActive) {
-        statusText.innerHTML = `Απόσταση από επόμενο σημείο: <br><b style="font-size: 1.5rem; color: #e74c3c;">${distance} μέτρα</b> 📍<br><small>(Ακρίβεια GPS: ~${accuracy}m)</small>`;
-    }
-
-    if (distance <= target.triggerRadius && !isEventActive) {
-        isEventActive = true; 
-        
-        if (userMarker) userMarker.setIcon(greenStarIcon);
-
-        statusText.innerHTML = "Είστε στο σημείο! 🎉";
-        
-        eventContainer.innerHTML = `
+    if (dist <= target.triggerRadius && !isEventActive) {
+        isEventActive = true;
+        userMarker.setIcon(greenStarIcon);
+        const eventBox = document.getElementById('active-event');
+        eventBox.innerHTML = `
             <h3>${target.name}</h3>
-            <p style="margin-top:10px; margin-bottom:15px;">${target.eventText}</p>
-            <button class="menu-btn" style="width: 100%; background-color: #2ecc71;" onclick="nextLandmark()">Συνέχισε την περιπέτεια 🧭</button>
+            <p>${target.eventText}</p>
+            <button class="start-btn" onclick="nextLandmark()" style="width:100%; margin-top:15px;">ΕΠΟΜΕΝΟ ΣΗΜΕΙΟ 🧭</button>
         `;
-        eventContainer.classList.remove('hidden');
+        eventBox.classList.remove('hidden');
+        switchTab('map'); // Αναγκάζουμε την οθόνη να δείξει το μήνυμα
     }
 }
 
-window.nextLandmark = function() {
-    currentTargetIndex++; 
-    isEventActive = false; 
-    
-    if (userMarker) userMarker.setIcon(redIcon);
-    
-    const eventContainer = document.getElementById('active-event');
-    const statusText = document.getElementById('gps-status');
-    
-    eventContainer.classList.add('hidden'); 
-    
-    if (currentTargetIndex >= landmarks.length) {
-        statusText.innerHTML = "Η περιπέτεια ολοκληρώθηκε! 🌟";
-        eventContainer.innerHTML = `
-            <h3>Συγχαρητήρια! 🏆</h3>
-            <p style="margin-top:10px;">Ολοκληρώσατε με επιτυχία την περιπέτεια!</p>
-        `;
-        eventContainer.classList.remove('hidden');
-        stopTracking(); 
-    } else {
-        statusText.innerHTML = "Αναζήτηση επόμενου σημείου... 🧭";
-    }
-};
-
-function stopTracking() {
-    if (watchId !== null) {
-        navigator.geolocation.clearWatch(watchId);
-        watchId = null;
+function nextLandmark() {
+    currentTargetIndex++;
+    isEventActive = false;
+    userMarker.setIcon(redIcon);
+    document.getElementById('active-event').classList.add('hidden');
+    document.getElementById('points').innerText = currentTargetIndex + "/2";
+    if(currentTargetIndex >= landmarks.length) {
+        document.getElementById('gps-status').innerText = "Η περιπέτεια ολοκληρώθηκε! 🏆";
     }
 }
 
 function calculateDistance(lat1, lon1, lat2, lon2) {
     const R = 6371e3; 
-    const φ1 = lat1 * Math.PI / 180;
-    const φ2 = lat2 * Math.PI / 180;
-    const Δφ = (lat2 - lat1) * Math.PI / 180;
-    const Δλ = (lon2 - lon1) * Math.PI / 180;
-
-    const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-              Math.cos(φ1) * Math.cos(φ2) *
-              Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-    return R * c; 
+    const dLat = (lat2-lat1) * Math.PI/180;
+    const dLon = (lon2-lon1) * Math.PI/180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1*Math.PI/180) * Math.cos(lat2*Math.PI/180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 }
