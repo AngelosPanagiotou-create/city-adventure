@@ -31,7 +31,7 @@ let userMarker = null;
 let totalPoints = 0;
 
 // Icons
-const redIcon = L.divIcon({ className: 'custom-icon', html: "<div style='background-color:#e74c3c; width:18px; height:18px; border-radius:50%; border:2px solid white;'></div>", iconSize: [18, 18], iconAnchor: [9, 9] });
+const redIcon = L.divIcon({ className: 'custom-icon', html: "<div style='background-color:#e74c3c; width:18px; height:18px; border-radius:50%; border:2px solid white; box-shadow: 0 0 5px rgba(0,0,0,0.5);'></div>", iconSize: [18, 18], iconAnchor: [9, 9] });
 const greenStarIcon = L.divIcon({ className: 'custom-icon star-icon', html: "<div style='color:#deff9a; font-size:30px; text-shadow: 0 0 5px #000;'>★</div>", iconSize: [30, 30], iconAnchor: [15, 15] });
 
 // Start Game
@@ -83,21 +83,33 @@ function startTracking() {
     );
 }
 
+// ------ ΔΙΟΡΘΩΜΕΝΗ ΛΟΓΙΚΗ ΓΙΑ ΤΑ ΜΗΝΥΜΑΤΑ ------ //
 function checkProximity(lat, lng) {
     if (currentTargetIndex >= landmarks.length) return;
     const target = landmarks[currentTargetIndex];
     const dist = calculateDistance(lat, lng, target.lat, target.lng);
     
+    // Ενημέρωση απόστασης (πάνω στον χάρτη)
     document.getElementById('dist-overlay').innerText = Math.round(dist) + " m";
 
+    const statusText = document.getElementById('gps-status');
+
+    // Όσο ψάχνουμε το σημείο, λέει ποιο σημείο ψάχνουμε
+    if (!isEventActive) {
+        // Παίρνουμε μόνο το όνομα πριν την άνω τελεία (π.χ. "Σημείο Άλφα")
+        let shortName = target.name.split(':')[0]; 
+        statusText.innerHTML = `🧭 Πορεία προς: <b style="color: #deff9a;">${shortName}</b>`;
+    }
+
+    // Όταν φτάσουμε στο σημείο
     if (dist <= target.triggerRadius && !isEventActive) {
         isEventActive = true;
+        statusText.innerHTML = "📍 Είστε στο σημείο!";
         userMarker.setIcon(greenStarIcon);
-        const eventBox = document.getElementById('active-event');
         
+        const eventBox = document.getElementById('active-event');
         let actionButton = '';
         if (target.actionType === "camera") {
-            // Κουμπί για άνοιγμα κάμερας!
             actionButton = `<button class="start-btn" onclick="openCamera()" style="width:100%; margin-top:15px; background-color:#3498db; color:white;">Βγάλε Φωτογραφία 📸</button>`;
         } else {
             actionButton = `<button class="start-btn" onclick="completeLandmark()" style="width:100%; margin-top:15px;">ΕΠΟΜΕΝΟ ΣΗΜΕΙΟ 🧭</button>`;
@@ -113,10 +125,8 @@ function checkProximity(lat, lng) {
     }
 }
 
-// ------ ΝΕΕΣ ΛΕΙΤΟΥΡΓΙΕΣ ΚΑΜΕΡΑΣ ΚΑΙ ΒΑΘΜΟΛΟΓΙΑΣ ------ //
-
 function openCamera() {
-    document.getElementById('camera-input').click(); // Ανοίγει η κάμερα του κινητού
+    document.getElementById('camera-input').click();
 }
 
 function savePhotoToInventory(event) {
@@ -125,28 +135,23 @@ function savePhotoToInventory(event) {
         const reader = new FileReader();
         reader.onload = function(e) {
             const photoDataUrl = e.target.result;
-            
-            // 1. Βάλε τη φωτογραφία στο Inventory!
             const inventoryGrid = document.getElementById('inventory-grid');
             inventoryGrid.innerHTML += `
                 <div class="inv-item">
                     <img src="${photoDataUrl}" class="inv-photo">
-                    <p style="margin-top:5px; font-size:12px;">Φωτό: ${landmarks[currentTargetIndex].name}</p>
+                    <p style="margin-top:5px; font-size:12px; font-weight:bold; color:#deff9a;">${landmarks[currentTargetIndex].name.split(':')[0]}</p>
                 </div>
             `;
-            
-            // 2. Προχώρα στο επόμενο βήμα!
             alert("Τέλεια λήψη! 📸 Αποθηκεύτηκε στο Σακίδιό σου!");
             completeLandmark();
         };
-        reader.readAsDataURL(file); // Μετατρέπει την εικόνα σε κώδικα για να αποθηκευτεί offline
+        reader.readAsDataURL(file); 
     }
 }
 
 function completeLandmark() {
     const target = landmarks[currentTargetIndex];
     
-    // Προσθήκη Πόντων & Badge
     totalPoints += target.points;
     document.getElementById('points-display').innerText = totalPoints;
     
@@ -158,18 +163,19 @@ function completeLandmark() {
         </div>
     `;
 
-    // Επαναφορά για το επόμενο σημείο
     currentTargetIndex++;
     isEventActive = false;
     userMarker.setIcon(redIcon);
     document.getElementById('active-event').classList.add('hidden');
     
     if(currentTargetIndex >= landmarks.length) {
-        document.getElementById('gps-status').innerText = "Η περιπέτεια ολοκληρώθηκε! 🏆";
+        document.getElementById('gps-status').innerHTML = "Η περιπέτεια ολοκληρώθηκε! 🏆";
+        document.getElementById('dist-overlay').innerText = "0 m";
         alert("Συγχαρητήρια! Έχεις μαζέψει όλα τα μετάλλια!");
-        switchTab('badges'); // Τους πάμε να δουν τα μετάλλιά τους στο τέλος!
+        switchTab('badges'); 
     } else {
-        document.getElementById('gps-status').innerText = "Αναζήτηση επόμενου σημείου...";
+        // Εδώ βάζουμε ένα μικρό μήνυμα μέχρι να ξανατρέξει το GPS στο επόμενο βήμα
+        document.getElementById('gps-status').innerHTML = "Εντοπισμός επόμενου στόχου... 🛰️";
     }
 }
 
